@@ -11,7 +11,7 @@ cloudinary.config({
 
 // server.js
 app.listen(process.env.PORT, "0.0.0.0", async () => {
-    console.log(`server is running at port ${PORT}`);
+    console.log(`server is running at port ${process.env.PORT}`);
     
     // Run this AFTER the server is live
     try {
