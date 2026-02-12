@@ -2,14 +2,17 @@ import nodeMailer from "nodemailer";
 
 export const sendEmail = async ({ email, subject, message }) => {
   const transporter = nodeMailer.createTransport({
-    service: "gmail",
+    host: "smtp.gmail.com",
+    port: 587,
+    secure: false, // Must be false for port 587
     auth: {
       user: process.env.SMTP_MAIL,
-      pass: process.env.SMTP_PASSWORD,
+      pass: process.env.SMTP_PASSWORD, // Must be a 16-digit App Password
     },
-    connectionTimeout: 5000,  // 5s timeout
-    greetingTimeout: 5000,
-    socketTimeout: 5000,
+    tls: {
+      rejectUnauthorized: false, // Essential for cloud hosting environments
+    },
+    connectionTimeout: 10000, // Increased to 10s for Render's free tier
   });
 
   const options = {

@@ -89,7 +89,7 @@ export const register = catchAsyncError(async (req, res, next) => {
 
     // 5. Send email
     try {
-        await sendEmail({
+        sendEmail({
             email,
             subject: "Verify Your Email",
             message: generateEmail(otp),
