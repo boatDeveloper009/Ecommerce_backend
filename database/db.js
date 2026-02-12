@@ -1,31 +1,22 @@
+import pkg from "pg";
+const { Pool } = pkg;
 
+const database = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false,
+  },
+  max: 10,
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 5000,
+});
 
-import { config } from "dotenv";
-config(); 
-import pkg from "pg"
+database.on("connect", () => {
+  console.log("Database connected successfully (Pool)");
+});
 
+database.on("error", (err) => {
+  console.error("Unexpected DB error", err);
+});
 
-const { Client } = pkg;
-
-
-
-const database = new Client({
-    user: process.env.DB_USER,
-    host: process.env.DB_HOST,
-    database: process.env.DB_NAME,
-    password: process.env.DB_PASSWORD,
-    port: process.env.DB_PORT,
-    ssl:{
-        required: true
-    }
-})
-
-try {
-    await database.connect()
-    console.log("Database connected successfully") 
-} catch (error) {
-    console.error("Database connection failed:", error)
-    process.exit(1)
-}
-
-export default database
+export default database;
