@@ -9,7 +9,7 @@ import { sendEmail } from "../utils/sendEmail.js";
 import { sendToken } from "../utils/jwtToken.js";
 import { generateResetPasswordToken } from "../utils/generateResetPasswordToken.js";
 import { generateResetPasswordEmail } from "../utils/generateResetPasswordEmail.js"
-import {v2 as cloudinary} from "cloudinary"
+import { v2 as cloudinary } from "cloudinary"
 
 
 
@@ -53,7 +53,7 @@ export const register = catchAsyncError(async (req, res, next) => {
 
     // 3. OTP generation
     const otp = crypto.randomInt(100000, 999999).toString();
-    
+
     const hashedOtp = crypto.createHash("sha256").update(otp).digest("hex");
 
     // Hash password ONLY for new user
@@ -88,11 +88,15 @@ export const register = catchAsyncError(async (req, res, next) => {
     }
 
     // 5. Send email
-    await sendEmail({
-        email,
-        subject: "Verify Your Email",
-        message: generateEmail(otp),
-    });
+    try {
+        await sendEmail({
+            email,
+            subject: "Verify Your Email",
+            message: generateEmail(otp),
+        });
+    } catch (error) {
+        console.error("Email sending failed:", error.message);
+    }
 
     res.status(200).json({
         success: true,
@@ -443,23 +447,23 @@ export const updatePassword = catchAsyncError(async (req, res, next) => {
     })
 })
 
-export const updateProfile = catchAsyncError(async (req, res, next)=>{
-    const {name, email} = req.body;
+export const updateProfile = catchAsyncError(async (req, res, next) => {
+    const { name, email } = req.body;
 
-    if(!name || !email){
-        return next(new ErrorHandler("Please provide all required fields",400));
+    if (!name || !email) {
+        return next(new ErrorHandler("Please provide all required fields", 400));
     }
 
-    if(name.trim().length === 0 || email.trim().length === 0){
-        return next(new ErrorHandler("Fields cannot be empty",400));
+    if (name.trim().length === 0 || email.trim().length === 0) {
+        return next(new ErrorHandler("Fields cannot be empty", 400));
     }
 
     let avatarData = {}
 
-    if(req.files && req.files.avatar){
-        const {avatar} = req.files;
+    if (req.files && req.files.avatar) {
+        const { avatar } = req.files;
 
-        if(req.user?.avatar?.public_id){
+        if (req.user?.avatar?.public_id) {
             await cloudinary.uploader.destroy(req.user.avatar.public_id)
         }
 
@@ -478,11 +482,11 @@ export const updateProfile = catchAsyncError(async (req, res, next)=>{
     }
 
     let user;
-    if(Object.keys(avatarData).length === 0){
+    if (Object.keys(avatarData).length === 0) {
         user = await database.query(`
             UPDATE users SET name = $1, email = $2 WHERE id = $3 RETURNING *
             `, [name, email, req.user.id])
-    }else{
+    } else {
         user = await database.query(`
             UPDATE users SET name = $1, email = $2, avatar = $3 WHERE id = $4 RETURNING *
             `, [name, email, avatarData, req.user.id])
