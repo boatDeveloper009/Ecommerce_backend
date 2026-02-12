@@ -9,16 +9,6 @@ cloudinary.config({
     api_secret: process.env.CLOUDINARY_CLIENT_SECRET
 })
 
-// server.js
-app.listen(process.env.PORT, "0.0.0.0", async () => {
-    console.log(`server is running at port ${process.env.PORT}`);
-    
-    // Run this AFTER the server is live
-    try {
-        const { createTables } = await import("./utils/createTables.js");
-        await createTables();
-        console.log("✅ Tables initialized");
-    } catch (err) {
-        console.error("❌ Table initialization failed", err);
-    }
-});
+app.listen(process.env.PORT, ()=>{
+    console.log(`server is running at port ${process.env.PORT}`)
+})

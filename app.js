@@ -87,3 +87,4 @@ app.use("/api/v1/order", orderRouter)
 
 app.use(errorMiddleware)
 
+createTables()
