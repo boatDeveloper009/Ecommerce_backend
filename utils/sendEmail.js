@@ -1,26 +1,37 @@
-import nodeMailer from "nodemailer";
+import axios from "axios";
 
 export const sendEmail = async ({ email, subject, message }) => {
-  const transporter = nodeMailer.createTransport({
-    host: "smtp.gmail.com",
-    port: 587,
-    secure: false, // Must be false for port 587
-    auth: {
-      user: process.env.SMTP_MAIL,
-      pass: process.env.SMTP_PASSWORD, // Must be a 16-digit App Password
-    },
-    tls: {
-      rejectUnauthorized: false, // Essential for cloud hosting environments
-    },
-    connectionTimeout: 10000, // Increased to 10s for Render's free tier
-  });
+  try {
+    await axios.post(
+      "https://api.brevo.com/v3/smtp/email",
+      {
+        sender: {
+          name: "Ecommerce App",
+          email: process.env.SMTP_MAIL, 
+          // ⚠ Must be verified in Brevo dashboard
+        },
+        to: [
+          {
+            email: email,
+          },
+        ],
+        subject: subject,
+        htmlContent: message,
+      },
+      {
+        headers: {
+          "api-key": process.env.BREVO_API,
+          "Content-Type": "application/json",
+        },
+      }
+    );
 
-  const options = {
-    from: process.env.SMTP_MAIL,
-    to: email,
-    subject,
-    html: message,
-  };
-
-  await transporter.sendMail(options);
+    console.log("Email sent successfully via Brevo");
+  } catch (error) {
+    console.error(
+      "Brevo email failed:",
+      error.response?.data || error.message
+    );
+    throw error;
+  }
 };
